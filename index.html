@@ -601,11 +601,21 @@
             pindahHalaman('menu-tema-page');
         }
 
-        function suaraMisterius(teks) {
-            const ucapan = new SpeechSynthesisUtterance(teks);
-            ucapan.lang = 'en-US';
-            ucapan.rate = 0.80;
-            window.speechSynthesis.speak(ucapan);
+        function suaraMisterius(teksInggris) {
+            // teksInggris diubah jadi huruf kecil dan hilangkan spasi untuk mencocokkan nama file wav
+            const namaFileAudio = teksInggris.toLowerCase().trim().replace(/ /g, "_");
+            
+            let pathAudio = "";
+            if (sumberDataSekarang === "online") {
+                pathAudio = `${URL_GITHUB}audio/${namaFileAudio}.wav`;
+            } else {
+                pathAudio = `audio/${namaFileAudio}.wav`;
+            }
+
+            const audio = new Audio(pathAudio);
+            audio.play().catch(error => {
+                console.log("Gagal memutar audio: ", error);
+            });
         }
 
         // ================= FITUR RUNTIME DOWNLOAD UPDATE DARI SERVER GITHUB =================
