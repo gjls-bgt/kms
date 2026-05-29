@@ -602,22 +602,44 @@
         }
 
         function suaraMisterius(teksInggris) {
-            // teksInggris diubah jadi huruf kecil dan hilangkan spasi untuk mencocokkan nama file wav
+            // 1. Standarisasi nama file
             const namaFileAudio = teksInggris.toLowerCase().trim().replace(/ /g, "_");
             
+            // 2. Tentukan jalur file
             let pathAudio = "";
             if (sumberDataSekarang === "online") {
                 pathAudio = `${URL_GITHUB}audio/${namaFileAudio}.wav`;
             } else {
                 pathAudio = `audio/${namaFileAudio}.wav`;
             }
-
-            const audio = new Audio(pathAudio);
-            audio.play().catch(error => {
-                console.log("Gagal memutar audio: ", error);
+        
+            // 3. Buat objek audio baru
+            const audio = new Audio();
+            audio.src = pathAudio;
+            audio.preload = "auto"; // Beritahu Android untuk langsung mengunduh data suara
+        
+            // 4. SOLUSI UTAMA: Tunggu hingga file siap putar tanpa putus
+            audio.addEventListener('canplaythrough', () => {
+                // Cek jika AudioContext bawaan browser tertidur (Sering terjadi di Android)
+                if (window.AudioContext || window.webkitAudioContext) {
+                    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    if (ctx.state === 'suspended') {
+                        ctx.resume(); // Bangunkan jalur audio sistem
+                    }
+                }
+                
+                // Mainkan audio
+                audio.play().catch(error => {
+                    console.log("Gagal memutar audio setelah dimuat: ", error);
+                });
+            }, { once: true }); // 'once: true' memastikan event ini hanya berjalan sekali per klik
+        
+            // Tangkap jika ternyata file wav benar-benar tidak ada di folder
+            audio.addEventListener('error', (e) => {
+                console.log("File audio rusak atau tidak ditemukan di jalur: " + pathAudio);
             });
         }
-
+        
         // ================= FITUR RUNTIME DOWNLOAD UPDATE DARI SERVER GITHUB =================
         async function periksaPembaruan() {
             const btn = document.getElementById('btn-update-data');
