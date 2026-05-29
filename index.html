@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kamus Tematik Anak Ceria</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background-color: #FEF08A; /* Kuning Lembut Backing */
+            color: #374151;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        /* 1. CONTAINER UTAMA DIKUNCI SEPADAN TINGGI LAYAR (100vh) */
+        .mobile-container {
+            width: 100%;
+            max-width: 450px;
+            background-color: #F0FDF4; /* Hijau Lembut Utama */
+            height: 100vh; /* Kunci tinggi aplikasi pas layar */
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden; /* Mencegah seluruh aplikasi ikut goyang/scroll */
+        }
+
+        .font-kids {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        /* 2. HALAMAN MENYESUAIKAN TINGGI CONTAINER INDUK */
+        .page {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%; /* Isi penuh container */
+            overflow: hidden; /* Kunci luapan halaman */
+        }
+        
+        .page.active {
+            display: flex;
+        }
+
+        /* ================= 1. COVER PAGE ================= */
+        #cover-page {
+            background-image: url('gambar/bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            align-items: center;
+            justify-content: flex-end;
+            text-align: center;
+            padding: 5px;
+        }
+
+        .btn-start {
+            background-color: #fde047;
+            color: #c2410c;
+            font-family: 'Fredoka One', cursive;
+            font-size: 20px;
+            padding: 14px 36px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+            margin-bottom: 0px;
+        }
+        .btn-start:active { transform: scale(0.95); }
+
+        /* ================= GENERAL HEADER (DIKUNCI / FIXED POSITION DI ATAS) ================= */
+        header {
+            text-align: center;
+            padding: 16px;
+            background: skyblue;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 100%;
+            flex-shrink: 0; /* Mencegah header gepeng/mengecil */
+        }
+
+        .main-title {
+            color: #ea580c;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        .search-container {
+            margin-top: 12px;
+            position: relative;
+            width: 100%;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 48px 12px 20px;
+            font-size: 16px;
+            border: 4px solid #fb923c;
+            border-radius: 50px;
+            outline: none;
+            font-weight: 700;
+            color: #4b5563;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .search-bar:focus { border-color: #ea580c; }
+        .search-icon { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); font-size: 18px; }
+
+        /* ================= 3. AREA KONTEN TENGAH (YANG BISA DI-SCROLL) ================= */
+        .scrollable-content {
+            flex-grow: 1; /* Ambil sisa ruang kosong yang tersedia */
+            overflow-y: auto; /* Aktifkan scroll vertikal KHUSUS di area ini saja */
+            padding: 16px;
+            width: 100%;
+            /* Trik smooth scroll untuk mobile browser */
+            -webkit-overflow-scrolling: touch; 
+        }
+
+        /* ================= AREA MENU TEMA ================= */
+        .section-title {
+            font-size: 20px;
+            color: #92400e;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .grid-tema {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .card-tema {
+            background-color: white;
+            border: 4px solid #fb923c;
+            border-radius: 24px;
+            padding: 20px 12px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 6px 0px #fb923c;
+            transition: all 0.1s ease;
+        }
+
+        .card-tema:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0px transparent;
+        }
+
+        .icon-tema {
+            font-size: 40px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .nama-tema {
+            font-size: 18px;
+            color: #ea580c;
+        }
+
+        /* CONTAINER TOMBOL CONFIGURASI */
+        .update-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 85%;
+            margin: 0 auto 20px auto;
+        }
+
+        /* TOMBOL UPDATE DATA */
+        .btn-update {
+            width: 100%;
+            background-color: #22c55e;
+            color: white;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #16a34a;
+            text-align: center;
+        }
+        .btn-update:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0px transparent;
+        }
+
+        /* TOMBOL RESET DATA LOKAL */
+        .btn-reset {
+            width: 100%;
+            background-color: #ef4444;
+            color: white;
+            font-family: 'Quicksand', sans-serif;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 3px 0px #dc2626;
+            text-align: center;
+        }
+        .btn-reset:active {
+            transform: translateY(3px);
+            box-shadow: 0 0px 0px transparent;
+        }
+
+        /* ================= AREA KATA PAGE (ISI KAMUS) ================= */
+        .nav-back-container {
+            display: flex;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .btn-kembali {
+            background-color: #fb923c;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            box-shadow: 0 3px 0px #c2410c;
+        }
+        .btn-kembali:active {
+            transform: translateY(3px);
+            box-shadow: 0 0px 0px transparent;
+        }
+
+        .label-tema-aktif {
+            margin-left: auto;
+            font-size: 16px;
+            color: #059669;
+            background-color: #d1fae5;
+            padding: 4px 14px;
+            border-radius: 50px;
+            border: 2px solid #34d399;
+        }
+
+        .kamus-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .card {
+            background-color: white;
+            border: 2px solid #34d399; 
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+
+        .card-img {
+            width: 100%;
+            height: 100px;
+            object-fit: contain;
+            background-color: #f3f4f6;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .card-indo { color: #059669; font-size: 16px; margin-bottom: 4px; }
+        .divider { width: 100%; border-top: 2px dashed #e5e7eb; margin: 6px 0; }
+        .card-eng { color: #f97316; font-size: 20px; display: flex; align-items: center; gap: 6px; }
+
+        .btn-audio {
+            background-color: #ffedd5;
+            border: none;
+            padding: 4px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .card-read { font-size: 12px; color: #3b82f6; font-style: italic; font-weight: 700; }
+
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #ea580c;
+            font-weight: bold;
+        }
+
+        .not-found { display: none; text-align: center; padding: 40px 16px; width: 100%; grid-column: span 2; }
+        .not-found-icon { font-size: 48px; margin-bottom: 8px; }
+        .not-found-text { font-size: 16px; font-weight: 700; color: #4b5563; }
+
+        /* ================= GENERAL FOOTER (DIKUNCI DI BAWAH) ================= */
+        footer {
+            background-color: #ea580c;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-weight: 700;
+            font-size: 13px;
+            width: 100%;
+            flex-shrink: 0; /* Mencegah footer gepeng/mengecil */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-container">
+        
+        <div id="cover-page" class="page active">
+            <button onclick="pindahHalaman('menu-tema-page')" class="btn-start">Mulai Belajar! 🚀</button>
+        </div>
+
+        <div id="menu-tema-page" class="page">
+            <header>
+                <h2 onclick="pindahHalaman('cover-page')" class="font-kids main-title">🇮🇩 Kamus Bergambar 🇬🇧</h2>
+                <div class="search-container">
+                    <input type="text" id="search-bar-menu" oninput="cariTemaSaja(this.value)" placeholder="Cari nama tema di sini..." class="search-bar">
+                    <span class="search-icon">🔍</span>
+                </div>
+            </header>
+
+            <div class="scrollable-content">
+                <div class="update-box">
+                    <button onclick="periksaPembaruan()" id="btn-update-data" class="btn-update">
+                        🔄 Periksa Pembaruan Data
+                    </button>
+                    <button onclick="resetKeDataLokal()" class="btn-reset">
+                        🗑️ Reset ke Data Bawaan APK
+                    </button>
+                </div>
+                <h3 class="font-kids section-title">🎯 Pilih Tema:</h3>
+                <div id="grid-tema-container" class="grid-tema"></div>
+                
+                <div id="not-found-tema" class="not-found">
+                    <p class="not-found-icon">🕵️‍♂️</p>
+                    <p class="not-found-text">Tema itu belum terdaftar...</p>
+                </div>
+            </div>
+
+            <footer>
+                <p>&copy; 2026 Kamus Bergambar by O'Cre Studio</p>
+            </footer>
+        </div>
+
+        <div id="kata-page" class="page">
+            <header>
+                <h2 onclick="pindahHalaman('cover-page')" class="font-kids main-title">🇮🇩 Kamus Bergambar 🇬🇧</h2>
+                <div class="search-container">
+                    <input type="text" id="search-bar-kata" oninput="cariKataDalamTemaSaja(this.value)" placeholder="Cari kata di tema ini..." class="search-bar">
+                    <span class="search-icon">🔍</span>
+                </div>
+                <div class="nav-back-container">
+                    <button onclick="kembaliKeMenuTema()" class="btn-kembali">◀ Menu Tema</button>
+                    <span id="label-tema-aktif" class="font-kids label-tema-aktif">Tema</span>
+                </div>                
+            </header>
+
+            <div class="scrollable-content" id="area-scroll-kata">
+                <div id="loader-status" class="loader">Memuat Kata... ⏳</div>
+
+                <main class="kamus-grid" id="kamus-grid"></main>
+
+                <div id="not-found-kata" class="not-found">
+                    <p class="not-found-icon">😢</p>
+                    <p class="not-found-text">Kata itu tidak ada di tema ini...</p>
+                </div>
+            </div>
+
+            <footer>
+                <p>&copy; 2026 Kamus Bergambar by O'Cre Studio</p>
+            </footer>
+        </div>
+
+    </div>
+
+    <script>
+        // ================= KONFIGURASI UPDATE GITHUB =================
+        const URL_GITHUB = "https://gjls-bgt.github.io/kms/"; 
+        const VERSI_ASLI_APK = 1; 
+
+        let daftarTema = [];
+        let kosakataAktifTema = []; 
+        let namaTemaSekarang = "";
+        let sumberDataSekarang = "lokal"; 
+
+        function pindahHalaman(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.scrollable-content').forEach(el => el.scrollTop = 0);
+            
+            if (pageId === 'menu-tema-page' && daftarTema.length === 0) {
+                muatKonfigurasiTema();
+            }
+        }
+
+        async function muatKonfigurasiTema() {
+            try {
+                let dataText = "";
+                const dataTerupdate = localStorage.getItem("update_daftar_tema.csv");
+                
+                if (dataTerupdate) {
+                    dataText = dataTerupdate;
+                    sumberDataSekarang = "online";
+                } else {
+                    const response = await fetch('daftar_tema.csv');
+                    dataText = await response.text();
+                    sumberDataSekarang = "lokal";
+                }
+                prosesDataTema(dataText);
+            } catch (error) {
+                console.error("Gagal memuat daftar tema", error);
+            }
+        }
+
+        function prosesDataTema(dataText) {
+            const baris = dataText.split('\n');
+            daftarTema = [];
+            for (let i = 1; i < baris.length; i++) {
+                if (baris[i].trim() === "") continue;
+                const kolom = baris[i].split(',');
+                daftarTema.push({
+                    nama: kolom[0].trim(),
+                    file: kolom[1].trim(),
+                    icon: mendapatkanEmojiOtomatis(kolom[0].trim()) 
+                });
+            }
+            daftarTema.sort((a, b) => a.nama.localeCompare(b.nama));
+            tampilkanGridTema(daftarTema);
+        }
+
+        function mendapatkanEmojiOtomatis(namaTema) {
+            const lower = namaTema.toLowerCase();
+            if(lower.includes('hewan') || lower.includes('animal')) return '🦁';
+            if(lower.includes('buah') || lower.includes('fruit')) return '🍎';
+            if(lower.includes('kendaraan') || lower.includes('transport')) return '🚀';
+            if(lower.includes('warna') || lower.includes('color')) return '🎨';
+            if(lower.includes('baju') || lower.includes('pakaian')) return '👕';
+            return '⭐';
+        }
+
+        function tampilkanGridTema(dataTema) {
+            const container = document.getElementById('grid-tema-container');
+            const notFoundTema = document.getElementById('not-found-tema');
+            container.innerHTML = '';
+            
+            if (dataTema.length === 0) {
+                notFoundTema.style.display = 'block';
+                return;
+            }
+            notFoundTema.style.display = 'none';
+
+            dataTema.forEach(tema => {
+                container.innerHTML += `
+                    <div class="card-tema" onclick="pilihDanMuatTema('${tema.nama}', '${tema.file}')">
+                        <span class="icon-tema">${tema.icon}</span>
+                        <span class="font-kids nama-tema">${tema.nama}</span>
+                    </div>
+                `;
+            });
+        }
+
+        function cariTemaSaja(keyword) {
+            const hasilFilter = daftarTema.filter(tema => 
+                tema.nama.toLowerCase().includes(keyword.toLowerCase())
+            );
+            tampilkanGridTema(hasilFilter);
+        }
+
+        async function pilihDanMuatTema(namaTema, fileCSV) {
+            namaTemaSekarang = namaTema;
+            document.getElementById('label-tema-aktif').innerText = namaTema;
+            document.getElementById('search-bar-kata').value = ''; 
+            document.getElementById('search-bar-kata').placeholder = `Cari kata di tema ${namaTema}...`;
+            
+            const grid = document.getElementById('kamus-grid');
+            const loader = document.getElementById('loader-status');
+            const notFoundKata = document.getElementById('not-found-kata');
+            
+            grid.innerHTML = '';
+            notFoundKata.style.display = 'none';
+            loader.style.display = 'block';
+            
+            pindahHalaman('kata-page');
+
+            try {
+                let dataText = "";
+                const dataTerupdate = localStorage.getItem("update_" + fileCSV);
+                
+                if (dataTerupdate) {
+                    dataText = dataTerupdate;
+                    sumberDataSekarang = "online"; 
+                } else {
+                    const response = await fetch(fileCSV);
+                    dataText = await response.text();
+                    sumberDataSekarang = "lokal";
+                }
+                
+                const baris = dataText.split('\n');
+                kosakataAktifTema = [];
+                for (let i = 1; i < baris.length; i++) {
+                    if (baris[i].trim() === "") continue;
+                    const kolom = baris[i].split(',');
+                    
+                    kosakataAktifTema.push({
+                        indonesia: kolom[0].trim(),
+                        inggris: kolom[1].trim(),
+                        caraBaca: kolom[2].trim()
+                    });
+                }
+                
+                loader.style.display = 'none';
+                tampilkanKamus(kosakataAktifTema);
+            } catch (error) {
+                console.error("Gagal memuat file tema: " + fileCSV, error);
+                loader.style.display = 'none';
+                notFoundKata.style.display = 'block';
+            }
+        }
+
+        function tampilkanKamus(data) {
+            const grid = document.getElementById('kamus-grid');
+            const notFoundKata = document.getElementById('not-found-kata');
+            grid.innerHTML = '';
+
+            if (data.length === 0) {
+                grid.style.display = 'none';
+                notFoundKata.style.display = 'block';
+                return;
+            } 
+            grid.style.display = 'grid';
+            notFoundKata.style.display = 'none';
+
+            data.forEach(item => {
+                const folderTema = encodeURIComponent(namaTemaSekarang);
+                const namaFile = encodeURIComponent(item.indonesia);
+                
+                let basisPath = "";
+                if (sumberDataSekarang === "online") {
+                    basisPath = `${URL_GITHUB}gambar/${folderTema}/${namaFile}`;
+                } else {
+                    basisPath = `gambar/${folderTema}/${namaFile}`;
+                }
+
+                const pathGambarJpg = `${basisPath}.jpg`;
+                const pathGambarPng = `${basisPath}.png`;
+
+                grid.innerHTML += `
+                    <div class="card">
+                        <img src="${pathGambarJpg}" 
+                             alt="${item.indonesia}" 
+                             class="card-img" 
+                             onerror="gantiKePng(this, '${pathGambarPng}')">
+                             
+                        <h3 class="font-kids card-indo">${item.indonesia}</h3>
+                        <div class="divider"></div>
+                        <h2 class="font-kids card-eng">
+                            ${item.inggris}
+                            <button onclick="suaraMisterius('${item.inggris.replace(/'/g, "\\'")}')" class="btn-audio">🔊</button>
+                        </h2>
+                        <p class="card-read">[${item.caraBaca}]</p>
+                    </div>
+                `;
+            });
+        }
+
+        function gantiKePng(elemenGambar, pathPng) {
+            if (!elemenGambar.dataset.mencobaPng) {
+                elemenGambar.dataset.mencobaPng = "true";
+                elemenGambar.src = pathPng; 
+            } else {
+                elemenGambar.src = 'https://placehold.co/150?text=Kosong'; 
+            }
+        }
+
+        function cariKataDalamTemaSaja(keyword) {
+            const hasilFilter = kosakataAktifTema.filter(item => 
+                item.indonesia.toLowerCase().includes(keyword.toLowerCase()) || 
+                item.inggris.toLowerCase().includes(keyword.toLowerCase())
+            );
+            tampilkanKamus(hasilFilter);
+        }
+
+        function kembaliKeMenuTema() {
+            document.getElementById('search-bar-menu').value = '';
+            tampilkanGridTema(daftarTema); 
+            pindahHalaman('menu-tema-page');
+        }
+
+        function suaraMisterius(teks) {
+            const ucapan = new SpeechSynthesisUtterance(teks);
+            ucapan.lang = 'en-US';
+            ucapan.rate = 0.80;
+            window.speechSynthesis.speak(ucapan);
+        }
+
+        // ================= FITUR RUNTIME DOWNLOAD UPDATE DARI SERVER GITHUB =================
+        async function periksaPembaruan() {
+            const btn = document.getElementById('btn-update-data');
+            btn.innerText = "Memeriksa... ⏳";
+            btn.disabled = true;
+
+            let versiSekarang = localStorage.getItem("versi_data") ? parseInt(localStorage.getItem("versi_data")) : VERSI_ASLI_APK;
+
+            try {
+                const resVersi = await fetch(`${URL_GITHUB}version.json?t=${new Date().getTime()}`);
+                if(!resVersi.ok) throw new Error();
+                const dataVersi = await resVersi.json();
+
+                if (dataVersi.versi > versiSekarang) {
+                    btn.style.backgroundColor = "#eab308";
+                    btn.innerText = "Mengunduh... 💾";
+                    
+                    const resTema = await fetch(`${URL_GITHUB}daftar_tema.csv?t=${new Date().getTime()}`);
+                    const teksTema = await resTema.text();
+                    const baris = teksTema.split('\n');
+                    
+                    for (let i = 1; i < baris.length; i++) {
+                        if (baris[i].trim() === "") continue;
+                        const fileCSV = baris[i].split(',')[1].trim();
+                        
+                        btn.innerText = `Mengunduh ${fileCSV}...`;
+                        const resKosakata = await fetch(`${URL_GITHUB}${fileCSV}?t=${new Date().getTime()}`);
+                        const teksKosakata = await resKosakata.text();
+                        
+                        localStorage.setItem("update_" + fileCSV, teksKosakata);
+                    }
+
+                    localStorage.setItem("update_daftar_tema.csv", teksTema);
+                    localStorage.setItem("versi_data", dataVersi.versi);
+
+                    alert("🎉 Pembaruan berhasil! Kamus Anda kini lebih lengkap.");
+                    btn.style.backgroundColor = "#22c55e";
+                    btn.innerText = "🔄 Periksa Pembaruan Data";
+                    btn.disabled = false;
+                    
+                    muatKonfigurasiTema();
+                } else {
+                    alert("Kamus Anda sudah menggunakan versi terbaru yang paling update! 👍");
+                    btn.style.backgroundColor = "#22c55e";
+                    btn.innerText = "🔄 Periksa Pembaruan Data";
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                alert("Gagal memeriksa pembaruan. Pastikan perangkat Anda terhubung ke internet.");
+                btn.style.backgroundColor = "#22c55e";
+                btn.innerText = "🔄 Periksa Pembaruan Data";
+                btn.disabled = false;
+            }
+        }
+
+        // ================= FITUR BARU: MENGEMBALIKAN KE DATA ASLI LOKAL APK =================
+        function resetKeDataLokal() {
+            const konfirmasi = confirm("Apakah Anda yakin ingin menghapus data unduhan dan kembali ke kamus versi bawaan awal?");
+            if (konfirmasi) {
+                // Ambil semua kunci di localStorage
+                const keys = Object.keys(localStorage);
+                
+                // Cari dan hapus semua yang berawalan "update_" dan juga versi_data
+                keys.forEach(key => {
+                    if (key.startsWith("update_") || key === "versi_data") {
+                        localStorage.removeItem(key);
+                    }
+                });
+
+                alert("♻️ Kamus berhasil dikembalikan ke versi data lokal bawaan APK!");
+                
+                // Setel status ke lokal dan muat ulang antarmuka data tema asli
+                sumberDataSekarang = "lokal";
+                muatKonfigurasiTema();
+            }
+        }
+    </script>
+</body>
+</html>
